@@ -16,3 +16,4 @@ playwright-report
 *.sig
 *.pem
 *.der
+.claude/worktrees/
