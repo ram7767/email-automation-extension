@@ -6,6 +6,20 @@ import { AppButton } from '@/components/AppButton';
 import { AppCard } from '@/components/AppCard';
 import { authStatus$, profiles$ } from '@/lib/state';
 import { send } from '@/lib/messages';
+import type { RuntimeEvent, SentSummary } from '@/lib/messages';
+
+function relativeTime(iso: string): string {
+  const then = Date.parse(iso);
+  if (Number.isNaN(then)) return 'just now';
+  const diff = Date.now() - then;
+  const min = Math.round(diff / 60000);
+  if (min < 1) return 'just now';
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.round(hr / 24);
+  return `${day}d ago`;
+}
 
 export function App() {
   useSignals();
@@ -14,6 +28,7 @@ export function App() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [bootstrapped, setBootstrapped] = useState(false);
+  const [lastSent, setLastSent] = useState<SentSummary | null>(null);
 
   useEffect(() => {
     void send({ type: 'BOOT_AUTH' });
@@ -36,6 +51,39 @@ export function App() {
       })();
     }
   }, [status, bootstrapped]);
+
+  useEffect(() => {
+    if (status !== 'signed-in') return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const reply = await send({ type: 'GET_LAST_SENT' });
+        if (!cancelled && reply.type === 'GET_LAST_SENT') {
+          setLastSent(reply.sent);
+        }
+      } catch {
+        /* popup may open before SW is ready; not critical */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [status, bootstrapped]);
+
+  useEffect(() => {
+    if (typeof chrome === 'undefined' || !chrome.runtime?.onMessage?.addListener) return;
+    const listener = (msg: unknown): void => {
+      if (!msg || typeof msg !== 'object') return;
+      const ev = msg as RuntimeEvent;
+      if (ev.type === 'EMAIL_SENT') {
+        setLastSent({ subject: ev.subject, sentAt: ev.sentAt });
+      }
+    };
+    chrome.runtime.onMessage.addListener(listener);
+    return () => {
+      chrome.runtime.onMessage.removeListener?.(listener);
+    };
+  }, []);
 
   async function handleSignIn() {
     setBusy(true);
@@ -109,6 +157,15 @@ export function App() {
               Open the EmailAutomation mobile app for sent activity.
             </p>
           </AppCard>
+          {lastSent && (
+            <p
+              className="text-xs text-text-muted"
+              data-testid="popup-last-sent"
+              aria-live="polite"
+            >
+              Last sent: {lastSent.subject ?? '(no subject)'} · {relativeTime(lastSent.sentAt)}
+            </p>
+          )}
           <AppButton onClick={openSettings} aria-label="Manage in settings">
             <Settings className="w-4 h-4" aria-hidden />
             Manage in settings

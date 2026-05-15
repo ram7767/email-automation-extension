@@ -35,15 +35,28 @@ export interface ProfileIndex {
   profiles: Profile[];
 }
 
+export interface SendJobAttachment {
+  name: string;
+  mimeType: string;
+  bytesBase64: string;
+}
+
 export interface SendJob {
   id: string;
   to: string;
   subject: string;
+  bodyText: string;
+  bodyHtml?: string;
   profileName: string;
   categoryName: string;
   resumeName: string | null;
+  attachments: SendJobAttachment[];
+  sourceUrl?: string | null;
   status: 'queued' | 'sending' | 'sent' | 'failed';
   attempts: number;
   lastError: string | null;
   createdAt: string;
+  sentAt?: string;
+  gmailMessageId?: string;
+  gmailThreadId?: string;
 }

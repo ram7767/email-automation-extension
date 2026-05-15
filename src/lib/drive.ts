@@ -8,6 +8,7 @@ const PROFILES_INDEX_FILE = 'profiles_index.json';
 const ROOT_KEY = 'drive.rootFolderId';
 const INDEX_FILE_KEY = 'drive.profilesIndexFileId';
 const PROFILES_FOLDER_KEY = 'drive.profilesFolderId';
+const METADATA_FOLDER_KEY = 'drive.metadataFolderId';
 
 const FOLDER_MIME = 'application/vnd.google-apps.folder';
 const MARKDOWN_MIME = 'text/markdown';
@@ -224,6 +225,29 @@ async function deleteFile(fileId: string): Promise<void> {
   await http<unknown>(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
     method: 'DELETE',
   });
+}
+
+async function getMetadataFolderId(): Promise<string> {
+  const cached = await chrome.storage.local.get([METADATA_FOLDER_KEY, ROOT_KEY]);
+  let id = cached[METADATA_FOLDER_KEY] as string | undefined;
+  if (id) return id;
+  const rootId = cached[ROOT_KEY] as string | undefined;
+  if (!rootId) throw new Error('drive: root not initialized');
+  id = await ensureFolder(METADATA_FOLDER, rootId);
+  await chrome.storage.local.set({ [METADATA_FOLDER_KEY]: id });
+  return id;
+}
+
+export async function findMetadataFile(name: string): Promise<string | null> {
+  const parentId = await getMetadataFolderId();
+  const file = await findFile(name, parentId);
+  return file?.id ?? null;
+}
+
+export async function createMetadataJson<T>(name: string, value: T): Promise<string> {
+  const parentId = await getMetadataFolderId();
+  const created = await uploadJsonAsNew(name, parentId, value);
+  return created.id;
 }
 
 async function getProfilesFolderId(): Promise<string> {
@@ -528,6 +552,7 @@ export async function ensureRoot(): Promise<{
   }
 
   const metadataFolderId = await ensureFolder(METADATA_FOLDER, rootFolderId);
+  await chrome.storage.local.set({ [METADATA_FOLDER_KEY]: metadataFolderId });
   if (!profilesFolderId) {
     profilesFolderId = await ensureFolder(PROFILES_FOLDER, rootFolderId);
     await chrome.storage.local.set({ [PROFILES_FOLDER_KEY]: profilesFolderId });

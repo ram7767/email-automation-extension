@@ -6,7 +6,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default [
-  { ignores: ['dist', 'coverage', 'node_modules', '*.config.js', '*.config.ts'] },
+  { ignores: ['dist', 'coverage', 'node_modules', '.claude', '*.config.js', '*.config.ts'] },
   js.configs.recommended,
   {
     files: ['src/**/*.{ts,tsx}', 'test/**/*.{ts,tsx}', 'scripts/**/*.mjs'],

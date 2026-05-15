@@ -16,11 +16,12 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./test/setup.ts'],
+    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache', '.claude/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary', 'html'],
       include: ['src/lib/**'],
-      exclude: ['**/*.test.*', '**/__mocks__/**'],
+      exclude: ['**/*.test.*', '**/__mocks__/**', 'src/lib/types.ts'],
     },
   },
 });

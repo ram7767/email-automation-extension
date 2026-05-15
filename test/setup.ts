@@ -51,4 +51,9 @@ function shimArea(map: Map<string, unknown>, area: chrome.storage.AreaName) {
     onMessage: { addListener: vi.fn() },
     sendMessage: vi.fn(async () => ({ ok: true })),
   },
+  alarms: {
+    create: vi.fn(),
+    clear: vi.fn(),
+    onAlarm: { addListener: vi.fn(), removeListener: vi.fn() },
+  },
 } as unknown as typeof chrome;

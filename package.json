@@ -34,6 +34,7 @@
     "@playwright/test": "^1.48.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/chrome": "^0.0.280",
     "@types/dompurify": "^3.0.5",
     "@types/react": "^18.3.12",

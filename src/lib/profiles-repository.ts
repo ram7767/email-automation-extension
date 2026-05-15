@@ -88,3 +88,20 @@ export async function updateTemplate(categoryId: string, body: string): Promise<
 export function _resetQueueForTests(): void {
   chain = Promise.resolve();
 }
+
+export function defaultResumeFor(
+  index: import('./types').ProfileIndex | null,
+  profileId: string,
+  categoryId: string,
+): import('./types').Resume | null {
+  if (!index) return null;
+  const profile = index.profiles.find((p) => p.id === profileId);
+  if (!profile) return null;
+  const category = profile.categories.find((c) => c.id === categoryId);
+  if (!category) return null;
+  if (category.defaultResumeId) {
+    const def = category.resumes.find((r) => r.id === category.defaultResumeId);
+    if (def) return def;
+  }
+  return category.resumes[0] ?? null;
+}
