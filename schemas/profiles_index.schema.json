@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://emailautomation.softsuave.com/schemas/profiles_index.schema.json",
+  "title": "ProfilesIndex",
+  "description": "Manifest of all profiles, categories, resumes, and templates stored in the user's Drive. Single source of truth shared by the Flutter app and the Chrome extension. MUST stay byte-compatible across both apps.",
+  "type": "object",
+  "required": ["schemaVersion", "rootFolderId", "updatedAt", "profiles"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Bump only when introducing a non-backward-compatible change. Bump → write a migrator in BOTH apps before shipping."
+    },
+    "rootFolderId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Drive fileId of the EmailAutomation root folder."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp of last write."
+    },
+    "updatedBy": {
+      "type": "string",
+      "enum": ["extension", "flutter-app"],
+      "description": "Which client wrote this revision (for debugging conflicts)."
+    },
+    "profiles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Profile" }
+    }
+  },
+  "$defs": {
+    "Profile": {
+      "type": "object",
+      "required": ["id", "name", "fileId", "createdAt", "categories"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "fileId": { "type": "string", "minLength": 1, "description": "Drive folder fileId" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "icon": { "type": "string", "description": "lucide icon name, optional" },
+        "categories": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Category" }
+        }
+      }
+    },
+    "Category": {
+      "type": "object",
+      "required": ["id", "name", "fileId", "createdAt", "resumes"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "fileId": { "type": "string", "minLength": 1, "description": "Drive folder fileId" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "defaultResumeId": { "type": ["string", "null"] },
+        "descriptionFileId": { "type": ["string", "null"], "description": "fileId of description.md" },
+        "templateFileId": { "type": ["string", "null"], "description": "fileId of email_template.md" },
+        "resumes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Resume" }
+        }
+      }
+    },
+    "Resume": {
+      "type": "object",
+      "required": ["id", "name", "fileId", "uploadedAt", "sizeBytes"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string", "minLength": 1 },
+        "fileId": { "type": "string", "minLength": 1 },
+        "uploadedAt": { "type": "string", "format": "date-time" },
+        "sizeBytes": { "type": "integer", "minimum": 0 },
+        "mimeType": { "type": "string" }
+      }
+    }
+  }
+}

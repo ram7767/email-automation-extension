@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches-ignore: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests + coverage
+        run: npm run test:run -- --coverage
+
+      - name: Coverage gate (>= 85% on src/lib/**)
+        run: node scripts/check-coverage.mjs
+
+      - name: Build (smoke)
+        run: npm run build
+
+      - name: Audit (high/critical only)
+        run: npm audit --omit=dev --audit-level=high

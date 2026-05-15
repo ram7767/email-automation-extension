@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:run -- --coverage
+      - run: node scripts/check-coverage.mjs
+
+      - name: Verify tag matches package.json
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./package.json').version")
+          MAN=$(node -p "require('./public/manifest.json').version")
+          if [ "$TAG" != "$PKG" ] || [ "$TAG" != "$MAN" ]; then
+            echo "Version mismatch: tag=$TAG package=$PKG manifest=$MAN"; exit 1
+          fi
+
+      - run: npm run build
+
+      - name: Zip
+        id: zip
+        run: |
+          cd dist
+          zip -r ../email-automation-extension-${GITHUB_REF_NAME}.zip .
+          echo "name=email-automation-extension-${GITHUB_REF_NAME}.zip" >> $GITHUB_OUTPUT
+
+      - name: Cosign sign
+        uses: sigstore/cosign-installer@v3
+      - run: |
+          cosign sign-blob --yes \
+            --output-signature ${{ steps.zip.outputs.name }}.sig \
+            ${{ steps.zip.outputs.name }}
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            ${{ steps.zip.outputs.name }}
+            ${{ steps.zip.outputs.name }}.sig
+
+      - name: Publish to Chrome Web Store
+        uses: mnao305/chrome-extension-upload@v5
+        with:
+          file-path: ${{ steps.zip.outputs.name }}
+          extension-id: ${{ secrets.CWS_EXTENSION_ID }}
+          client-id: ${{ secrets.CWS_CLIENT_ID }}
+          client-secret: ${{ secrets.CWS_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CWS_REFRESH_TOKEN }}
+          publish: true

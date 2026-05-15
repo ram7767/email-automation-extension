@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://emailautomation.softsuave.com/schemas/sent_emails.schema.json",
+  "title": "SentEmailsLog",
+  "description": "Append-only log of every successfully-sent application email. Sharded by month once size > 500. Shared by Flutter app and Chrome extension.",
+  "type": "object",
+  "required": ["schemaVersion", "currentShard", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "currentShard": {
+      "type": "string",
+      "description": "fileName of the active shard, e.g. 'sent_emails_2026-05.json'. Reads MUST follow this pointer when loading recent history."
+    },
+    "entries": {
+      "type": "array",
+      "description": "Entries in the *current* file only. Older entries live in shard files referenced by name pattern.",
+      "items": { "$ref": "#/$defs/SentEntry" }
+    }
+  },
+  "$defs": {
+    "SentEntry": {
+      "type": "object",
+      "required": ["id", "sentAt", "profileName", "categoryName", "recipientHash", "gmailMessageId", "client"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "sentAt": { "type": "string", "format": "date-time" },
+        "profileName": { "type": "string" },
+        "categoryName": { "type": "string" },
+        "resumeName": { "type": ["string", "null"] },
+        "recipientHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}$",
+          "description": "First 8 hex chars of sha256(recipient_email_lowercased). Allows dedup without storing PII."
+        },
+        "subject": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Subject line for user-facing history. NOT body."
+        },
+        "gmailMessageId": { "type": "string" },
+        "gmailThreadId": { "type": "string" },
+        "client": {
+          "type": "string",
+          "enum": ["extension", "flutter-app"]
+        },
+        "sourceUrl": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "LinkedIn / Indeed page the email was extracted from (extension only)."
+        }
+      }
+    }
+  }
+}

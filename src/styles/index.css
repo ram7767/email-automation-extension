@@ -1,0 +1,9 @@
+@import './tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body { background: var(--color-bg); color: var(--color-text); font-family: var(--font-sans); }
+body { margin: 0; }
+
+*:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-sm); }

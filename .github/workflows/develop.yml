@@ -1,0 +1,58 @@
+name: Develop prerelease
+
+on:
+  push:
+    branches: [develop]
+
+concurrency:
+  group: develop-build
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-attach:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:run -- --coverage
+      - run: node scripts/check-coverage.mjs
+
+      - name: Compute dev version
+        id: ver
+        run: |
+          BASE=$(node -p "require('./package.json').version")
+          SHA=$(git rev-parse --short HEAD)
+          echo "value=${BASE}-dev.${SHA}" >> $GITHUB_OUTPUT
+
+      - name: Patch manifest version
+        run: |
+          jq --arg v "${{ steps.ver.outputs.value }}" '.version = $v' public/manifest.json > /tmp/m.json
+          mv /tmp/m.json public/manifest.json
+
+      - name: Build
+        run: npm run build
+
+      - name: Zip
+        run: |
+          cd dist
+          zip -r ../email-automation-extension-${{ steps.ver.outputs.value }}.zip .
+
+      - name: Update rolling 'develop' release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: develop
+          name: "Latest develop build (${{ github.sha }})"
+          prerelease: true
+          generate_release_notes: true
+          files: email-automation-extension-${{ steps.ver.outputs.value }}.zip

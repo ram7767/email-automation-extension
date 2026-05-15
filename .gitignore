@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+.vite
+.DS_Store
+*.log
+.env
+.env.local
+
+# Playwright
+test-results
+playwright-report
+
+# Releases
+*.zip
+*.sig
