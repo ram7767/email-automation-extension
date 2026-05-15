@@ -20,6 +20,14 @@ Agents (`.claude/agents/`):
 - `drive-schema-checker` — validates schemas against code that touches them
 - `linkedin-indeed-selector-auditor` — verifies content-script selectors against live DOM
 
+## Hard constraint — no dashboard, no history view in this repo
+The extension WRITES to `metadata/sent_emails.json` (it's the one doing the sending) but MUST NOT show:
+- A dashboard
+- A scrollable sent-emails / history list
+- Aggregate stats (per-profile, per-category counts)
+
+The Flutter app at `../email-automation-app` is the canonical reader of `sent_emails.json`. The extension popup may show at most "Last sent: <subject> · <relative time>" — nothing more. Direct users to the mobile app for history.
+
 ## Tech stack
 - **Build**: Vite 5 + `@crxjs/vite-plugin` (MV3 HMR), TypeScript 5
 - **UI**: React 18 + Tailwind CSS 3 + lucide-react icons

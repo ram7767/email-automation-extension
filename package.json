@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build && node scripts/sync-version.mjs",
     "preview": "vite preview",
-    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
@@ -20,15 +20,17 @@
   },
   "dependencies": {
     "@preact/signals-react": "^2.0.0",
+    "dompurify": "^3.2.0",
+    "globals": "^17.6.0",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^0.460.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "rxjs": "^7.8.1",
-    "dompurify": "^3.2.0",
-    "gray-matter": "^4.0.3"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.27",
+    "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.48.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.0.1",
@@ -57,8 +59,13 @@
     "vitest": "^2.1.4"
   },
   "lint-staged": {
-    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{css,json,md}": ["prettier --write"]
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,json,md}": [
+      "prettier --write"
+    ]
   },
   "engines": {
     "node": ">=20"
