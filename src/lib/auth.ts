@@ -13,9 +13,10 @@ export async function getAccessToken(interactive = false): Promise<string | null
   });
 }
 
-export async function signIn(): Promise<void> {
+export async function signIn(): Promise<boolean> {
   const token = await getAccessToken(true);
   authStatus$.value = token ? 'signed-in' : 'signed-out';
+  return Boolean(token);
 }
 
 export async function signOut(): Promise<void> {
@@ -28,14 +29,16 @@ export async function signOut(): Promise<void> {
         method: 'POST',
       });
     } catch {
-      /* surface only if we add a logger that strips tokens */
+      /* ignore network failure on revoke; the local token is already cleared */
     }
   }
   await chrome.storage.session.clear();
   authStatus$.value = 'signed-out';
 }
 
-export async function bootAuthStatus(): Promise<void> {
+export async function bootAuthStatus(): Promise<'signed-in' | 'signed-out'> {
   const token = await getAccessToken(false);
-  authStatus$.value = token ? 'signed-in' : 'signed-out';
+  const status = token ? 'signed-in' : 'signed-out';
+  authStatus$.value = status;
+  return status;
 }
