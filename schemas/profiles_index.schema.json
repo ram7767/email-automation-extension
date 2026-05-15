@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://emailautomation.softsuave.com/schemas/profiles_index.schema.json",
+  "$id": "https://emailautomation.ratnakar.com/schemas/profiles_index.schema.json",
   "title": "ProfilesIndex",
   "description": "Manifest of all profiles, categories, resumes, and templates stored in the user's Drive. Single source of truth shared by the Flutter app and the Chrome extension. MUST stay byte-compatible across both apps.",
   "type": "object",

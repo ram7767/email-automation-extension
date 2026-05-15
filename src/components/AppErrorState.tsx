@@ -8,7 +8,7 @@ interface Props {
 }
 
 const ISSUE_URL =
-  'https://github.com/softsuave/email-automation-extension/issues/new';
+  'https://github.com/ratnakar/email-automation-extension/issues/new';
 
 export function AppErrorState({ title = "Something didn't load", message, onRetry }: Props) {
   return (

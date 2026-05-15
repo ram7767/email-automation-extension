@@ -51,4 +51,4 @@ Then load `dist/` as an unpacked extension in `chrome://extensions`.
 See `.claude/skills/release-flow.md` for the full pipeline and `.github/workflows/` for the CI.
 
 ## License
-MIT (or whatever monika@softsuave.com decides — TODO: pick one).
+MIT (TODO: confirm with the maintainer).

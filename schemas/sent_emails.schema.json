@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://emailautomation.softsuave.com/schemas/sent_emails.schema.json",
+  "$id": "https://emailautomation.ratnakar.com/schemas/sent_emails.schema.json",
   "title": "SentEmailsLog",
   "description": "Append-only log of every successfully-sent application email. Sharded by month once size > 500. Shared by Flutter app and Chrome extension.",
   "type": "object",
