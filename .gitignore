@@ -14,3 +14,5 @@ playwright-report
 # Releases
 *.zip
 *.sig
+*.pem
+*.der

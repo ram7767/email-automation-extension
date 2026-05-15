@@ -5,29 +5,54 @@
   "description": "Send job-application emails from LinkedIn / Indeed using resumes stored in your own Google Drive.",
   "version": "0.1.0",
   "minimum_chrome_version": "120",
-  "permissions": ["identity", "storage", "alarms", "scripting", "activeTab"],
+  "permissions": [
+    "identity",
+    "storage",
+    "alarms",
+    "scripting",
+    "activeTab"
+  ],
   "host_permissions": [
     "https://www.linkedin.com/*",
     "https://*.indeed.com/*",
     "https://www.googleapis.com/*",
     "https://oauth2.googleapis.com/*"
   ],
-  "background": { "service_worker": "src/background/service-worker.ts", "type": "module" },
-  "action": { "default_popup": "src/popup/index.html", "default_title": "EmailAutomation" },
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "EmailAutomation"
+  },
   "options_page": "src/options/index.html",
   "content_scripts": [
     {
-      "matches": ["https://www.linkedin.com/*"],
-      "js": ["src/content/linkedin.ts"],
+      "matches": [
+        "https://www.linkedin.com/*"
+      ],
+      "js": [
+        "src/content/linkedin.ts"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://*.indeed.com/*"],
-      "js": ["src/content/indeed.ts"],
+      "matches": [
+        "https://*.indeed.com/*"
+      ],
+      "js": [
+        "src/content/indeed.ts"
+      ],
       "run_at": "document_idle"
     }
   ],
-  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
   "oauth2": {
     "client_id": "REPLACE_WITH_CHROME_EXTENSION_OAUTH_CLIENT_ID.apps.googleusercontent.com",
     "scopes": [
@@ -41,5 +66,5 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'"
   },
-  "key": "REPLACE_WITH_PACKED_KEY_TO_PIN_EXTENSION_ID"
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1cxlN0tbNZpcM9RTu0We/xGD3eF2XAL6kphRk/HZJ6JLvrjhbWHKPJj4ekYvf8VdRa33+Y+YOEK4fCas3uD4X0R/TFRvrlSLi45GGsOqTppwwcHhu0ykZ4Sz/CG41O5Axf+P3mR0P+9Y+OgbRQRaFWDDNnaOrpT6dMV0cHjjWl+CBws2pxhtxO62f0L7gXGWG4uk5NKFoQwajK168+H1KO/inIZcKxoWRhSQr13He9UzMeakGMdY3s9AFG8HMD3ynSdeR8bq3nchdBeKazX8blGfa4nfa2NV1mpl3KhqCYrx4uhtlcUyOpweQyeBGQp5uHhDw6iGcS3UYGNAatXiPwIDAQAB"
 }
