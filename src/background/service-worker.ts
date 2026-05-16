@@ -41,7 +41,11 @@ function wireQueue(): void {
   });
 }
 
-wireQueue();
+try {
+  wireQueue();
+} catch (e) {
+  console.warn('[EmailAutomation] queue wiring deferred:', e);
+}
 
 chrome.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === 'install') {

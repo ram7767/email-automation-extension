@@ -4,12 +4,25 @@ const TOKEN_KEY = 'auth.accessToken';
 
 export async function getAccessToken(interactive = false): Promise<string | null> {
   return new Promise((resolve) => {
-    chrome.identity.getAuthToken({ interactive }, (token) => {
-      if (chrome.runtime.lastError || !token) return resolve(null);
-      const t = typeof token === 'string' ? token : (token as { token: string }).token;
-      void chrome.storage.session.set({ [TOKEN_KEY]: t });
-      resolve(t);
-    });
+    let settled = false;
+    const safeResolve = (v: string | null): void => {
+      if (settled) return;
+      settled = true;
+      resolve(v);
+    };
+    const timeoutId = setTimeout(() => safeResolve(null), 8000);
+    try {
+      chrome.identity.getAuthToken({ interactive }, (token) => {
+        clearTimeout(timeoutId);
+        if (chrome.runtime.lastError || !token) return safeResolve(null);
+        const t = typeof token === 'string' ? token : (token as { token: string }).token;
+        void chrome.storage.session.set({ [TOKEN_KEY]: t });
+        safeResolve(t);
+      });
+    } catch {
+      clearTimeout(timeoutId);
+      safeResolve(null);
+    }
   });
 }
 
