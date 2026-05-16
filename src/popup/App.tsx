@@ -31,7 +31,24 @@ export function App() {
   const [lastSent, setLastSent] = useState<SentSummary | null>(null);
 
   useEffect(() => {
-    void send({ type: 'BOOT_AUTH' });
+    let cancelled = false;
+    const timeoutId = setTimeout(() => {
+      if (!cancelled && authStatus$.value === 'unknown') {
+        authStatus$.value = 'signed-out';
+        setErr('Background service worker did not respond. Try reloading the extension.');
+      }
+    }, 4000);
+    void send({ type: 'BOOT_AUTH' })
+      .catch((e) => {
+        if (cancelled) return;
+        authStatus$.value = 'signed-out';
+        setErr(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => clearTimeout(timeoutId));
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
